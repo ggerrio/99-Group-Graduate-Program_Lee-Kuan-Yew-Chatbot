@@ -16,20 +16,22 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   onNewChat,
   onClearChat,
 }) => {
-  const { toggleSidebar } = useSidebar();
+  const { sidebarOpen, toggleSidebar } = useSidebar();
 
   return (
     <header className="flex h-16 items-center justify-between border-b bg-card px-4 md:px-6 shrink-0">
       <div className="flex items-center gap-3 min-w-0">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={toggleSidebar}
-          className="md:hidden shrink-0"
-          aria-label="Toggle Navigation"
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
+        {!sidebarOpen && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleSidebar}
+            className="shrink-0"
+            aria-label="Toggle Navigation"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        )}
 
         <div className="flex items-center gap-2 truncate">
           <div className="p-1.5 bg-primary/10 rounded-lg shrink-0">

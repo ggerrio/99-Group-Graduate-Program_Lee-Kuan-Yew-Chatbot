@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   Search,
   BookOpen,
+  Menu,
 } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { useChatStore } from '@/store/useChatStore';
@@ -58,8 +59,8 @@ export const MainLayout: React.FC = () => {
 
       {/* Responsive Sidebar (Desktop Fixed / Mobile Drawer) */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r bg-card transition-all duration-300 md:static ${
-          sidebarOpen ? 'w-72 translate-x-0' : '-translate-x-full md:w-0 md:translate-x-0'
+        className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-card transition-all duration-300 md:static overflow-hidden ${
+          sidebarOpen ? 'w-72 translate-x-0 border-r' : '-translate-x-full md:w-0 md:translate-x-0'
         }`}
       >
         {/* Sidebar Header */}
@@ -158,7 +159,18 @@ export const MainLayout: React.FC = () => {
       </aside>
 
       {/* Main Viewport Content Area */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden relative">
+        {!sidebarOpen && location.pathname !== '/' && (
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={toggleSidebar}
+            className="absolute top-4 left-4 z-40 h-9 w-9 rounded-xl shadow-xs bg-card border hover:bg-muted shrink-0 hidden md:flex items-center justify-center"
+            title="Expand Sidebar"
+          >
+            <Menu className="h-4 w-4" />
+          </Button>
+        )}
         <Outlet />
       </div>
     </div>
