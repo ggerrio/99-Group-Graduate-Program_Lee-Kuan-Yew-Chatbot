@@ -3,7 +3,7 @@ import { PageContainer } from '@/components/common/PageContainer';
 import { SectionTitle } from '@/components/common/SectionTitle';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { BookOpen, Award, FileText, Globe, Layers } from 'lucide-react';
+import { BookOpen, Award, FileText, Globe, Layers, User } from 'lucide-react';
 
 export const AboutPage: React.FC = () => {
   return (
@@ -26,7 +26,24 @@ export const AboutPage: React.FC = () => {
               This application offers an AI-powered conversational experience preserving the governance philosophy, strategic economic decisions, and foreign policy perspectives of Singapore’s founding Prime Minister, <strong>Lee Kuan Yew</strong>.
             </p>
             <p>
-              By combining high-density Retrieval-Augmented Generation (RAG) with Google Gemini 2.5, the chatbot delivers factually grounded answers anchored directly in historical literature.
+              By combining high-density Retrieval-Augmented Generation (RAG) with Google Gemini, the chatbot delivers factually grounded answers anchored directly in historical literature.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <User className="h-5 w-5 text-primary" />
+              <span>Project Author & Submission</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground leading-relaxed space-y-2">
+            <p>
+              Developed by <strong>Gerrio Pratama</strong> for the <em>"What Would Lee Kuan Yew Do?"</em> challenge.
+            </p>
+            <p>
+              Built with a production-ready RAG architecture combining FastAPI, custom vector retrieval over 5,772 ingested document chunks, and an evaluation metrics framework.
             </p>
           </CardContent>
         </Card>
@@ -74,8 +91,8 @@ export const AboutPage: React.FC = () => {
         </Card>
 
         <div className="flex items-center justify-between text-xs text-muted-foreground border-t pt-4">
-          <span>Frontend Architecture Phase 1</span>
-          <Badge variant="outline">Version 0.1.0</Badge>
+          <span>Built by Gerrio Pratama</span>
+          <Badge variant="outline">Version 1.0.0</Badge>
         </div>
       </div>
     </PageContainer>

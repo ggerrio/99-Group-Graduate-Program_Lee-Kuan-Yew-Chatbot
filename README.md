@@ -1,195 +1,166 @@
 # Lee Kuan Yew AI Chatbot
 
-An AI-powered chatbot application trained on Lee Kuan Yew's memoirs, speeches, interviews, and articles. The application provides factually grounded, insightful text responses using Retrieval-Augmented Generation (RAG) and Google Gemini 2.5.
+An AI-powered conversational application designed for the **"What Would Lee Kuan Yew Do?"** challenge. The system preserves the governance philosophy, economic strategies, and foreign policy perspectives of Singapore's founding Prime Minister, **Lee Kuan Yew**, delivering factually grounded answers in his persona backed by direct source citations.
+
+The chatbot is powered by a custom Retrieval-Augmented Generation (RAG) pipeline combining a local vectorized NumPy search index over 5,772 document chunks with Google Gemini API, wrapped in a React frontend and FastAPI backend.
 
 ---
 
-## 🚀 Project Overview
+## 🏗 System Architecture & End-to-End Flow
 
-The **Lee Kuan Yew AI Chatbot** enables users to explore Lee Kuan Yew's perspectives on leadership, governance, economics, geopolitics, and life philosophy. 
+The application processes user queries through a multi-stage RAG pipeline:
 
-This repository contains **Phase 0: Project Foundation & Engineering Setup**, establishing a clean, modular, and production-ready foundation for future development phases.
+```
+[User Query]
+     │
+     ▼
+[1. Query Normalizer] ──► Collapses punctuation & cleans noise
+     │
+     ▼
+[2. Vector Embedder] ──► BAAI/bge-small-en-v1.5 (384-dim vector)
+     │
+     ▼
+[3. Local Vector Search] ──► Matrix dot-product over 5,772 pre-computed chunks (< 2ms)
+     │
+     ▼
+[4. Context Assembly] ──► Token budget allocation (max 3,000 tokens)
+     │
+     ▼
+[5. Persona Prompting] ──► System prompt with strict anti-fabrication grounding rules
+     │
+     ▼
+[6. Gemini Generation] ──► Generates first-person response or canonical refusal
+     │
+     ▼
+[7. Citation Validator] ──► Verifies document title, year, and page references
+     │
+     ▼
+[Client Response] ──► Text, citation pills, refusal status, post-2015 inference flag
+```
 
 ---
 
 ## 🛠 Tech Stack
 
-### Frontend
-- **Framework**: React 19 + Vite
-- **Language**: TypeScript (Strict Mode)
-- **Styling**: Tailwind CSS, CSS Variables Design Tokens
-- **UI Components**: shadcn/ui foundation
-- **Icons**: Lucide React
-- **State Management**: Zustand
-- **Data Fetching**: TanStack Query (React Query)
-- **HTTP Client**: Axios
-- **Routing**: React Router v6 (Lazy loaded routes)
-- **Formatting**: React Markdown
-
-### Backend
-- **Framework**: Python 3.11+ / FastAPI
-- **Web Server**: Uvicorn
-- **Database**: SQLite (SQLAlchemy 2.0 ORM)
-- **Migrations**: Alembic
-- **Validation & Settings**: Pydantic v2 / Pydantic Settings
-- **Environment Management**: python-dotenv
-
-### AI & Vector Stack (Future Phases)
-- **LLM**: Google Gemini 2.5 Flash API
-- **RAG Orchestration**: LlamaIndex
-- **Vector Database**: Qdrant
-- **Embeddings**: BAAI/bge-small-en-v1.5
-- **PDF Parser**: PyPDF
-- **Evaluation**: Ragas
-
-### Deployment & Containerization
-- **Frontend**: Vercel ready
-- **Backend**: Docker container-ready (`Dockerfile`)
+| Layer | Technologies & Tools |
+| :--- | :--- |
+| **Frontend** | React 19, Vite, TypeScript, Tailwind CSS, shadcn/ui, Zustand, TanStack Query, Lucide React, Framer Motion |
+| **Backend** | Python 3.11+, FastAPI, Uvicorn, Pydantic v2, Loguru, SQLAlchemy |
+| **RAG & Vector Search** | `BAAI/bge-small-en-v1.5` (SentenceTransformers), NumPy vectorized dot-product matrix, Google Gemini API (`gemini-2.0-flash`) |
+| **Evaluation Framework** | Custom eval harness (`app/evaluation/`), 60-query gold dataset (`queries.jsonl`), Faithfulness & Persona rubrics |
+| **Deployment** | Vercel (Frontend), Railway Docker Container (Backend) |
 
 ---
 
-## 🏗 Architecture & Folder Structure
+## 💡 Key Architectural Design Decisions
 
-The project strictly adheres to **Clean Architecture** and **Separation of Concerns**.
+1. **Local NumPy Matrix Retrieval vs. Managed Vector Database**:
+   - Rather than introducing an external managed vector DB dependency (such as Qdrant Cloud), the retrieval engine loads 5,772 pre-computed document vector payloads into a pre-normalized $(5772, 384)$ NumPy matrix.
+   - Vector similarity is computed via matrix-vector dot product in **$< 1.5\text{ms}$** per query. This minimizes deployment complexity, eliminates network latency to an external database, and ensures $100\%$ reproducible offline search.
 
-```
-.
-├── .env.example              # Environment variables template
-├── .gitignore                # Git ignore configuration
-├── Dockerfile                # Backend containerization Dockerfile
-├── README.md                 # Project documentation
-├── alembic.ini               # Alembic database migrations config
-├── alembic/                  # Database migration scripts
-├── components.json           # shadcn/ui configuration
-├── package.json              # Frontend dependencies and scripts
-├── requirements.txt          # Python backend dependencies
-├── tailwind.config.js        # Tailwind CSS theme configuration
-├── tsconfig.json             # TypeScript root configuration
-├── vite.config.ts            # Vite bundler & path alias configuration
-│
-├── app/                      # Python FastAPI Backend Architecture
-│   ├── main.py               # FastAPI application entrypoint & lifespan
-│   ├── api/                  # API routing and versioned endpoints
-│   │   └── v1/
-│   │       ├── router.py     # Aggregated v1 API Router
-│   │       └── endpoints/    # Feature endpoints (e.g. health check)
-│   ├── core/                 # Settings management & logging utilities
-│   ├── config/               # Additional module configuration
-│   ├── database/             # SQLAlchemy engine, session & base models
-│   ├── models/               # ORM database entities (future phases)
-│   ├── schemas/              # Pydantic request/response schemas
-│   ├── services/             # Core business logic services
-│   ├── rag/                  # Retrieval-Augmented Generation module
-│   ├── ingestion/            # PDF document parsing & chunking
-│   ├── prompts/              # System prompts & persona guidelines
-│   ├── evaluation/           # Ragas evaluation framework
-│   ├── utils/                # General backend utility functions
-│   ├── scripts/              # Command-line & operational tools
-│   └── tests/                # Automated pytest test suites
-│
-├── knowledge/                # Raw Corpus Source Documents
-│   ├── memoirs/              # LKY Memoirs
-│   ├── speeches/             # Public Speeches & Addresses
-│   ├── interviews/           # Transcribed Interviews
-│   └── articles/             # Articles & Commentary
-│
-└── src/                      # React Frontend Architecture
-    ├── main.tsx              # React entry point
-    ├── App.tsx               # App router, providers & layout wrapper
-    ├── index.css             # Tailwind base styles & CSS design tokens
-    ├── components/           # UI components (shadcn/ui & custom)
-    │   ├── ui/               # Reusable primitives (Button, Card, Input)
-    │   └── common/           # Shared components (ThemeToggle)
-    ├── features/             # Domain-specific feature modules
-    ├── hooks/                # Custom React hooks (useTheme)
-    ├── layouts/              # MainLayout application shell
-    ├── pages/                # Page views (ChatPage, NotFoundPage)
-    ├── services/             # Axios API client & endpoints
-    ├── store/                # Zustand global state (theme, sidebar)
-    ├── types/                # TypeScript interface definitions
-    └── lib/                  # Utilities (cn helper)
-```
+2. **Grounding-First Persona Design**:
+   - The persona system prompt (`persona_prompt.txt`) prioritizes strict factual grounding over stylistic flourish.
+   - **Refusal Mechanism**: If top retrieval similarity falls below threshold ($< 0.35$), the system returns a canonical refusal (*"I have not publicly expressed a clear position on this matter..."*).
+   - **Post-2015 Event Handling**: Queries regarding events after Lee Kuan Yew's lifetime (March 2015) are detected via regular expressions and keyword scanners, automatically prepending an explicit disclaimer: `"AN INFERENCE BASED ON HISTORICAL PRINCIPLES"`.
+
+3. **Built-In LLM Evaluation Framework**:
+   - The repository includes a evaluation framework (`app/evaluation/`) featuring a 60-query benchmark gold dataset.
+   - Automated metrics evaluate Faithfulness, Persona Consistency, Citation Validity, and Refusal Precision using LLM-as-a-judge rubrics.
 
 ---
 
-## ⚡ Installation & Setup
+## 🔗 Live Production Deployment
+
+* **Frontend App (Vercel)**: `https://lky-chatbot.vercel.app`
+* **Backend API (Railway)**: `https://99-group-graduate-programlee-kuan-yew-chatbot-production.up.railway.app`
+* **API Documentation**: `https://99-group-graduate-programlee-kuan-yew-chatbot-production.up.railway.app/docs`
+
+---
+
+## ⚡ Local Setup & Development Instructions
 
 ### Prerequisites
-- **Node.js**: v18.0+ or v20.0+
-- **Python**: v3.11+
-- **Git**
+* **Node.js**: v18.0+ or v20.0+
+* **Python**: v3.11+
+* **Docker & Docker Compose** (Optional, for containerized local setup)
 
-### 1. Clone Repository
+### Option A: Running via Docker Compose
+
 ```bash
-git clone <repository-url>
+# 1. Clone the repository
+git clone https://github.com/ggerrio/99-Group-Graduate-Program_Lee-Kuan-Yew-Chatbot.git
 cd 99-Group-Graduate-Program_Lee-Kuan-Yew-Chatbot
+
+# 2. Copy environment file
+cp .env.example .env
+# Fill in your GEMINI_API_KEY in .env
+
+# 3. Spin up backend container
+docker-compose up --build
 ```
+Backend server will be running at `http://localhost:8000`.
 
-### 2. Frontend Setup
+---
+
+### Option B: Running Standalone (Localhost)
+
+#### 1. Backend Setup (FastAPI)
 ```bash
-# Install NPM dependencies
-npm install
-
-# Start Vite Development Server
-npm run dev
-```
-The frontend application will be running at `http://localhost:3000` (or `http://localhost:5173`).
-
-### 3. Backend Setup
-```bash
-# Create Python Virtual Environment
+# Navigate to project root and create virtual environment
 python -m venv .venv
 
-# Activate Virtual Environment
-# On Windows:
+# Activate virtual environment
+# Windows:
 .venv\Scripts\activate
-# On macOS/Linux:
+# macOS/Linux:
 source .venv/bin/activate
 
-# Install Python dependencies
+# Install dependencies
 pip install -r requirements.txt
 
-# Start FastAPI Uvicorn Server
-uvicorn app.main:app --reload
+# Start backend server
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
-The backend server will be running at `http://localhost:8000`.
+
+#### 2. Frontend Setup (React / Vite)
+```bash
+# Install NPM packages
+npm install
+
+# Start Vite dev server
+npm run dev
+```
+Frontend application will open at `http://localhost:3000` or `http://localhost:5173`.
 
 ---
 
-## 🧪 Development Workflow & Verification
+## 🧪 Running Automated Tests & Evaluation
 
-### Health Endpoint Check
-Verify backend service status by opening in browser or running:
 ```bash
-curl http://localhost:8000/health
-```
-Response:
-```json
-{
-  "status": "ok"
-}
-```
+# Run pytest regression test suite
+pytest app/tests/test_phase6_3_regression.py -v
 
-### Interactive API Documentation (Swagger)
-Access Swagger UI at:
-`http://localhost:8000/docs`
+# Run targeted 5-case regression harness
+python -m app.evaluation.runners.run_phase6_3_regression
 
-### Code Quality & Linting
-```bash
-# Frontend Typecheck & Lint
-npm run typecheck
-npm run lint
-
-# Backend Pytest Suite
-pytest app/tests
+# Run full 60-query evaluation benchmark
+python -m app.evaluation.runners.run_evaluation
 ```
 
 ---
 
-## 🗺 Future Roadmap
+## 📌 Known Limitations & Future Work
 
-- **Phase 1: Knowledge Ingestion Pipeline** — PDF extraction, text chunking, and metadata parsing from `/knowledge`.
-- **Phase 2: Vector Search & Embeddings** — Qdrant vector database integration with `BAAI/bge-small-en-v1.5`.
-- **Phase 3: Gemini 2.5 RAG Pipeline** — LlamaIndex RAG chain, system prompt persona, and context-grounded response generation.
-- **Phase 4: Interactive Chat UI** — Real-time chat streaming interface, message history, citations, and source viewer.
-- **Phase 5: Evaluation & Optimization** — Ragas evaluation benchmarks, latency optimization, and production deployment on Vercel & Docker.
+1. **Knowledge Corpus Scope**: The current ingested vector index contains **5,772 chunks** derived primarily from Lee Kuan Yew's major memoirs (*The Singapore Story*, *From Third World to First*, *One Man's View of the World*) and *Singapore's Bilingual Journey*. The `knowledge/speeches/` and `knowledge/interviews/` directories are reserved for future corpus expansion.
+2. **Evaluation Metrics Baseline**:
+   - In the Phase 6.3 targeted regression benchmark over 5 previously failing queries, the system achieved **5/5 (100%) pass rate** (Faithfulness: `5.0/5.0`).
+   - In the full 60-query Phase 6.1 baseline evaluation, overall faithfulness scored **87.5%**, with residual hallucinations occurring on broad synthesis queries. Refusal precision measured **42.8%** due to strict prefix-matching criteria.
+3. **Session State**: Conversation history is maintained in-memory per session (`InMemoryChatHistoryManager`) and is not persisted to an external database.
+
+---
+
+## 👨‍💻 Author & Credits
+
+* **Author**: Gerrio Pratama
+* **Challenge**: *"What Would Lee Kuan Yew Do?"* AI Engineering Challenge
+* **Submission Version**: `v1.0.0`

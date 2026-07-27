@@ -151,6 +151,9 @@ export const MainLayout: React.FC = () => {
               if (isMobile) setSidebarOpen(false);
             }}
           />
+          <div className="pt-2 pb-1 text-center text-[11px] font-medium text-muted-foreground/70 border-t border-border/40 mt-1">
+            Built by <span className="font-semibold text-foreground/80">Gerrio Pratama</span>
+          </div>
         </div>
       </aside>
 

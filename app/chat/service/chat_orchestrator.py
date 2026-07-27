@@ -61,20 +61,20 @@ class ChatOrchestrator:
         active_session_id = session_id or str(uuid.uuid4())
         logger.info(f"Processing chat query for session '{active_session_id}': '{message[:60]}...'")
 
-        # Phase 6.3: Normalize query for cleaner retrieval signal (handles noisy/misspelled edge cases)
+        # Clean query punctuation to improve embedding similarity search
         retrieval_query = self._normalize_query(message)
 
-        # Step 1: Retrieve relevant chunks
+        # Vector retrieval for candidate chunks
         chunks = self.retriever.retrieve(
             query=retrieval_query,
             top_k=settings.RETRIEVAL_TOP_K,
             filters=filters,
         )
 
-        # Step 2: Temporal Post-March 2015 check
+        # Temporal check for events occurring after LKY's lifetime (March 2015)
         is_post_2015 = Post2015Detector.is_post_2015_event(message, chunks)
 
-        # Step 3: Relevance / Refusal check
+        # Handle low retrieval confidence or empty vector match
         top_score = chunks[0].score if chunks else 0.0
         if not chunks or (top_score < settings.SIMILARITY_SCORE_THRESHOLD and not is_post_2015):
             logger.info(f"Low retrieval confidence (score {top_score} < threshold {settings.SIMILARITY_SCORE_THRESHOLD}). Triggering refusal.")
@@ -83,16 +83,16 @@ class ChatOrchestrator:
             self.history_manager.add_turn(active_session_id, "assistant", refusal_msg)
             return refusal_msg, [], active_session_id, True, False
 
-        # Step 4: Context Assembly within token budget
+        # Assemble retrieved text context within token limits
         context_block, used_chunks = self.context_builder.build_context(chunks)
 
-        # Step 5: Format Persona System Prompt
+        # Format system prompt with grounding context and user query
         full_prompt = self.prompt_template.format(
             context_block=context_block,
             user_query=message,
         )
 
-        # Step 6: Generate persona response via Gemini API
+        # Generate persona response via Gemini service
         raw_response = self.gemini_service.generate_response(
             prompt=full_prompt,
             history=self.history_manager.get_history(active_session_id),
@@ -106,7 +106,7 @@ class ChatOrchestrator:
                 f"{raw_response}"
             )
 
-        # Step 7: Build Citation Payloads
+        # Build citation metadata payloads
         citations: List[Dict[str, Any]] = []
         for chunk in used_chunks:
             meta = chunk.metadata
@@ -119,7 +119,7 @@ class ChatOrchestrator:
             }
             citations.append(citation)
 
-        # Step 7.5: Refusal Override Check (Strict Prefix & Exclusive Refusal)
+        # Override citations and mark as refusal if output contains canonical refusal phrasing
         CANONICAL_REFUSAL_MARKERS = [
             "i have not publicly expressed a clear position",
             "i have not publicly expressed a position",
@@ -139,7 +139,7 @@ class ChatOrchestrator:
             citations = []
             logger.info("Generated response indicates exclusive refusal. Overriding is_refusal=True and clearing citations.")
 
-        # Step 8: Save to in-memory history
+        # Save turn to in-memory conversation history
         self.history_manager.add_turn(active_session_id, "user", message)
         self.history_manager.add_turn(active_session_id, "assistant", final_answer)
 

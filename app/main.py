@@ -24,42 +24,35 @@ async def lifespan(app: FastAPI):
     # Database initialization & connection probe
     init_db()
 
-    # Pre-warm SentenceTransformer embedding model & local vector retriever
+    # Pre-warm SentenceTransformer embedding model and vector retriever
     try:
         from app.retrieval.query_embedder.query_embedder import QueryEmbedder
         from app.retrieval.vector_search.qdrant_retriever import LocalVectorRetriever
 
-        logger.info("Pre-warming QueryEmbedder sentence-transformer model during startup...")
+        logger.info("Pre-warming embedding model during startup...")
         embedder = QueryEmbedder()
         embedder.embed_query("warmup")
-        logger.info("QueryEmbedder pre-warmed successfully.")
 
-        # CRITICAL: Pre-warm the retriever so embeddings are loaded before first request
-        logger.info("Pre-warming LocalVectorRetriever during startup...")
+        logger.info("Pre-warming vector retriever index during startup...")
         retriever = LocalVectorRetriever()
 
-        # Diagnostic logging to verify path resolution
         logger.info(f"PROCESSED_DIR resolved to: {retriever.processed_dir.absolute()}")
         logger.info(f"Embeddings directory: {retriever.embeddings_dir.absolute()}")
-        logger.info(f"Embeddings dir exists: {retriever.embeddings_dir.exists()}")
 
         if retriever.embeddings_dir.exists():
             json_files = list(retriever.embeddings_dir.glob("*_embeddings.json"))
-            logger.info(f"Found {len(json_files)} embedding JSON files: {[f.name for f in json_files]}")
+            logger.info(f"Loaded {len(json_files)} embedding JSON files: {[f.name for f in json_files]}")
 
         if retriever.embedding_matrix is not None:
             logger.info(
-                f"SUCCESS: LocalVectorRetriever loaded {len(retriever.local_cache)} documents, "
+                f"LocalVectorRetriever loaded {len(retriever.local_cache)} documents, "
                 f"matrix shape {retriever.embedding_matrix.shape}"
             )
         else:
-            logger.error(
-                "FAILURE: LocalVectorRetriever loaded but embedding_matrix is None! "
-                "This means retrieval will always return empty results and LLM will refuse all queries."
-            )
+            logger.error("LocalVectorRetriever loaded but embedding_matrix is None.")
 
     except Exception as exc:
-        logger.error(f"CRITICAL WARMUP ERROR: {exc}")
+        logger.error(f"Startup warmup error: {exc}")
         logger.error(traceback.format_exc())
 
     yield

@@ -21,8 +21,7 @@ class LocalVectorRetriever:
     over pre-computed 5,772 document embeddings from /processed/embeddings/.
     """
     def __init__(self, processed_dir: Optional[Path] = None):
-        # FIX: Avoid default-argument evaluation trap.
-        # If processed_dir is not passed, resolve from settings at instantiation time.
+        # Resolve processed_dir from settings if not explicitly provided
         self.processed_dir = processed_dir or Path(getattr(settings, "PROCESSED_DIR", "processed"))
         self.embeddings_dir = self.processed_dir / "embeddings"
         self.embedder = QueryEmbedder()
@@ -32,18 +31,15 @@ class LocalVectorRetriever:
 
     def _load_local_index(self):
         """
-        Loads exported vector payload JSON files from Phase 3 (/processed/embeddings/)
-        and compiles a pre-normalized NumPy matrix for sub-millisecond similarity search.
+        Loads pre-computed vector payload JSON files from processed/embeddings/
+        and compiles a pre-normalized NumPy matrix for similarity search.
         """
         logger.info(f"LocalVectorRetriever initializing...")
         logger.info(f"Resolved processed_dir: {self.processed_dir.absolute()}")
         logger.info(f"Resolved embeddings_dir: {self.embeddings_dir.absolute()}")
 
         if not self.embeddings_dir.exists():
-            logger.error(
-                f"CRITICAL: Embeddings directory does not exist: {self.embeddings_dir.absolute()}. "
-                f"Retriever will return empty results for all queries."
-            )
+            logger.error(f"Embeddings directory does not exist: {self.embeddings_dir.absolute()}")
             return
 
         self.local_cache.clear()
