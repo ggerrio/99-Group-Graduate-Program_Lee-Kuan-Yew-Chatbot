@@ -1,6 +1,6 @@
 # Phase 6.3 Evaluation Report: Targeted Regression Fix
 
-> Generated: 2026-07-27 10:48  |  Scope: 5 previously failing queries (NOT the full 60-query benchmark)
+> Generated: 2026-07-27 10:53  |  Scope: 5 previously failing queries (NOT the full 60-query benchmark)
 
 ---
 
@@ -40,10 +40,10 @@
 ### Generated Answer
 
 ```
-
+I have not publicly expressed a clear position on this matter based on the available records.
 ```
 
-**is_refusal:** `False` | **is_post_2015:** `False`
+**is_refusal:** `True` | **is_post_2015:** `False`
 
 ### Citations
 
@@ -55,7 +55,7 @@
 | :--- | :---: | :---: | :---: |
 | Faithfulness Score | `1.0/5.0` | **`5.0/5.0`** | `+4.0` |
 
-**Faithfulness Reason:** Empty answer/refusal
+**Faithfulness Reason:** Correct refusal
 
 ### Persona Score
 
@@ -88,10 +88,10 @@
 ### Generated Answer
 
 ```
-
+I have not publicly expressed a clear position on this matter based on the available records.
 ```
 
-**is_refusal:** `False` | **is_post_2015:** `False`
+**is_refusal:** `True` | **is_post_2015:** `False`
 
 ### Citations
 
@@ -103,7 +103,7 @@
 | :--- | :---: | :---: | :---: |
 | Faithfulness Score | `2.0/5.0` | **`5.0/5.0`** | `+3.0` |
 
-**Faithfulness Reason:** Empty answer/refusal
+**Faithfulness Reason:** Correct refusal
 
 ### Persona Score
 
@@ -136,10 +136,10 @@
 ### Generated Answer
 
 ```
-
+I have not publicly expressed a clear position on this matter based on the available records.
 ```
 
-**is_refusal:** `False` | **is_post_2015:** `False`
+**is_refusal:** `True` | **is_post_2015:** `False`
 
 ### Citations
 
@@ -151,7 +151,7 @@
 | :--- | :---: | :---: | :---: |
 | Faithfulness Score | `2.0/5.0` | **`5.0/5.0`** | `+3.0` |
 
-**Faithfulness Reason:** Empty answer/refusal
+**Faithfulness Reason:** Correct refusal
 
 ### Persona Score
 
@@ -184,10 +184,10 @@
 ### Generated Answer
 
 ```
-
+I have not publicly expressed a clear position on this matter based on the available records.
 ```
 
-**is_refusal:** `False` | **is_post_2015:** `False`
+**is_refusal:** `True` | **is_post_2015:** `False`
 
 ### Citations
 
@@ -199,7 +199,7 @@
 | :--- | :---: | :---: | :---: |
 | Faithfulness Score | `2.0/5.0` | **`5.0/5.0`** | `+3.0` |
 
-**Faithfulness Reason:** Empty answer/refusal
+**Faithfulness Reason:** Correct refusal
 
 ### Persona Score
 
@@ -232,10 +232,10 @@
 ### Generated Answer
 
 ```
-
+I have not publicly expressed a clear position on this matter based on the available records.
 ```
 
-**is_refusal:** `False` | **is_post_2015:** `False`
+**is_refusal:** `True` | **is_post_2015:** `False`
 
 ### Citations
 
@@ -247,7 +247,7 @@
 | :--- | :---: | :---: | :---: |
 | Faithfulness Score | `2.0/5.0` | **`5.0/5.0`** | `+3.0` |
 
-**Faithfulness Reason:** Empty answer/refusal
+**Faithfulness Reason:** Correct refusal
 
 ### Persona Score
 
