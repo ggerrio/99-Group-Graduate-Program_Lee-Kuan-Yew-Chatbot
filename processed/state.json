@@ -1,0 +1,22 @@
+{
+  "Singapore\u2019s Bilingual Journey.pdf": {
+    "sha256": "140b011e10bac70031f744d9687f03e6c6b4aa960b4793fa0541e782ab69a4d4",
+    "chunks_count": 25,
+    "output_file": "processed\\embeddings\\Singapore\u2019s_Bilingual_Journey_embeddings.json"
+  },
+  "From-Third-World-to-First-World_The-Singapore-Story-1965-2000-Lee-Kwan-Yew_compressed.pdf": {
+    "sha256": "8004b22aabab154b95cafea77ecab0fb4cd7c759095fe7fc57063f64a298e6b6",
+    "chunks_count": 2676,
+    "output_file": "processed\\embeddings\\From-Third-World-to-First-World_The-Singapore-Story-1965-2000-Lee-Kwan-Yew_compressed_embeddings.json"
+  },
+  "ONE MAN'S VIEW of the WORLD.pdf": {
+    "sha256": "ba32dc171f0fde19af1a9dc388b0b21f84163ae976bc7bf1fc1ba668751ce2c9",
+    "chunks_count": 844,
+    "output_file": "processed\\embeddings\\ONE_MAN'S_VIEW_of_the_WORLD_embeddings.json"
+  },
+  "the-singapore-story-memoirs-of-lee-kuan-yew-981-204-983-5_compress_compressed.pdf": {
+    "sha256": "73e2819ec913b95098203c44d8bfa97e1aa5877a212d4899a467bf8e60d3db59",
+    "chunks_count": 2227,
+    "output_file": "processed\\embeddings\\the-singapore-story-memoirs-of-lee-kuan-yew-981-204-983-5_compress_compressed_embeddings.json"
+  }
+}

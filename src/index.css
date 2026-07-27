@@ -1,0 +1,173 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 20% 98%;
+    --foreground: 224 71% 4%;
+
+    --surface: 0 0% 100%;
+    --surface-hover: 220 14% 96%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 224 71% 4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71% 4%;
+
+    --primary: 220 85% 25%;
+    --primary-foreground: 210 20% 98%;
+
+    --secondary: 220 14% 93%;
+    --secondary-foreground: 220 85% 25%;
+
+    --muted: 220 14% 93%;
+    --muted-foreground: 220 8% 46%;
+
+    --accent: 220 14% 90%;
+    --accent-foreground: 224 71% 4%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 20% 98%;
+
+    --border: 220 13% 88%;
+    --input: 220 13% 88%;
+    --ring: 220 85% 25%;
+    --radius: 0.75rem;
+
+    /* Phase 1 Custom Semantic Tokens */
+    --success: 142 71% 45%;
+    --warning: 38 92% 50%;
+    --error: 0 84% 60%;
+
+    --code-block-bg: 220 13% 95%;
+    --code-block-header: 220 13% 90%;
+    
+    --user-bubble-bg: 220 85% 25%;
+    --user-bubble-fg: 210 20% 98%;
+
+    --assistant-bubble-bg: 0 0% 100%;
+    --assistant-bubble-fg: 224 71% 4%;
+    --assistant-bubble-border: 220 13% 88%;
+  }
+
+  .dark {
+    --background: 224 25% 10%;
+    --foreground: 210 20% 98%;
+
+    --surface: 224 25% 14%;
+    --surface-hover: 224 25% 18%;
+
+    --card: 224 25% 14%;
+    --card-foreground: 210 20% 98%;
+    --popover: 224 25% 14%;
+    --popover-foreground: 210 20% 98%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 224 71% 4%;
+
+    --secondary: 215 16% 20%;
+    --secondary-foreground: 210 20% 98%;
+
+    --muted: 215 16% 20%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 215 16% 24%;
+    --accent-foreground: 210 20% 98%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 20% 98%;
+
+    --border: 215 16% 22%;
+    --input: 215 16% 22%;
+    --ring: 217 91% 60%;
+
+    /* Phase 1 Custom Semantic Tokens (Dark) */
+    --success: 142 70% 45%;
+    --warning: 38 92% 50%;
+    --error: 0 63% 45%;
+
+    --code-block-bg: 224 25% 8%;
+    --code-block-header: 224 25% 12%;
+
+    --user-bubble-bg: 217 91% 60%;
+    --user-bubble-fg: 224 71% 4%;
+
+    --assistant-bubble-bg: 224 25% 14%;
+    --assistant-bubble-fg: 210 20% 98%;
+    --assistant-bubble-border: 215 16% 22%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground transition-colors duration-200 antialiased font-sans selection:bg-primary/20 selection:text-primary;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Typography Scale */
+  h1 {
+    @apply text-3xl font-bold tracking-tight md:text-4xl;
+  }
+  h2 {
+    @apply text-2xl font-semibold tracking-tight md:text-3xl;
+  }
+  h3 {
+    @apply text-xl font-semibold tracking-tight;
+  }
+  h4 {
+    @apply text-lg font-medium tracking-tight;
+  }
+  p {
+    @apply leading-relaxed;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/40 transition-colors;
+}
+
+/* Markdown Custom Styling */
+.markdown-content p {
+  @apply mb-3 last:mb-0 leading-relaxed;
+}
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4 {
+  @apply mt-4 mb-2 font-semibold text-foreground;
+}
+.markdown-content ul {
+  @apply list-disc list-inside space-y-1 my-2 pl-2;
+}
+.markdown-content ol {
+  @apply list-decimal list-inside space-y-1 my-2 pl-2;
+}
+.markdown-content blockquote {
+  @apply border-l-4 border-primary/50 pl-4 py-1 my-3 text-muted-foreground italic bg-muted/30 rounded-r-md;
+}
+.markdown-content table {
+  @apply w-full border-collapse my-4 text-sm;
+}
+.markdown-content th,
+.markdown-content td {
+  @apply border border-border px-3 py-2 text-left;
+}
+.markdown-content th {
+  @apply bg-muted font-medium;
+}
+.markdown-content code:not(pre code) {
+  @apply bg-muted px-1.5 py-0.5 rounded text-xs font-mono text-primary font-medium;
+}

@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lky_chatbot_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - LOG_LEVEL=INFO
+      - DATABASE_URL=sqlite:///./data/lky_chatbot.db
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - QDRANT_URL=http://qdrant:6333
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+  # Vector Database Service Placeholder (For Future Phase Integration)
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: lky_chatbot_qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    restart: unless-stopped
+
+volumes:
+  qdrant_data:
