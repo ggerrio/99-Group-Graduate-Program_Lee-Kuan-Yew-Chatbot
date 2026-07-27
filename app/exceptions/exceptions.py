@@ -26,3 +26,8 @@ class NotFoundException(AppException):
 class ValidationException(AppException):
     def __init__(self, message: str = "Validation failed", details: Optional[Dict[str, Any]] = None):
         super().__init__(message=message, status_code=422, details=details)
+
+class GeminiGenerationException(AppException):
+    def __init__(self, message: str = "AI generation service unavailable", details: Optional[Dict[str, Any]] = None):
+        super().__init__(message=message, status_code=503, details=details)
+

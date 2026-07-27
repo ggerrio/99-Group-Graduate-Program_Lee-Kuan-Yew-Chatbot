@@ -101,9 +101,30 @@ class ChatOrchestrator:
             }
             citations.append(citation)
 
+        # Step 7.5: Refusal Override Check (Strict Prefix & Exclusive Refusal)
+        CANONICAL_REFUSAL_MARKERS = [
+            "i have not publicly expressed a clear position",
+            "i have not publicly expressed a position",
+            "i do not have a recorded position",
+            "i have no recorded position",
+            "outside the scope of my recorded",
+            "did not take a public stance",
+            "cannot find any recorded statement",
+            "no official stance recorded",
+            "no documented position",
+        ]
+        
+        is_refusal = False
+        answer_prefix = final_answer.lower()[:150].strip()
+        if any(marker in answer_prefix for marker in CANONICAL_REFUSAL_MARKERS) and len(final_answer) < 350:
+            is_refusal = True
+            citations = []
+            logger.info("Generated response indicates exclusive refusal. Overriding is_refusal=True and clearing citations.")
+
         # Step 8: Save to in-memory history
         self.history_manager.add_turn(active_session_id, "user", message)
         self.history_manager.add_turn(active_session_id, "assistant", final_answer)
 
-        logger.info(f"Chat processing complete for session '{active_session_id}'. Citations: {len(citations)}.")
-        return final_answer, citations, active_session_id, False, is_post_2015
+        logger.info(f"Chat processing complete for session '{active_session_id}'. Citations: {len(citations)}, is_refusal: {is_refusal}.")
+        return final_answer, citations, active_session_id, is_refusal, is_post_2015
+

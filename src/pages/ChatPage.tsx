@@ -1,5 +1,6 @@
 import React from 'react';
 import { useChatStore } from '@/store/useChatStore';
+import { useSendMessage } from '@/hooks/useChat';
 import { ChatHeader } from '@/components/chat/ChatHeader';
 import { ChatContainer } from '@/components/chat/ChatContainer';
 import { ChatFooter } from '@/components/chat/ChatFooter';
@@ -10,24 +11,19 @@ export const ChatPage: React.FC = () => {
     inputPrompt,
     isGenerating,
     setInputPrompt,
-    addMessage,
     clearMessages,
     createNewChat,
     setIsGenerating,
   } = useChatStore();
 
-  const handleSend = (text: string) => {
-    addMessage(text, 'user');
-    setIsGenerating(true);
+  const { sendMessage, retryMessage } = useSendMessage();
 
-    // Simulated UI-only response echo for Phase 1 testing
-    setTimeout(() => {
-      addMessage(
-        `Thank you for your inquiry: *"__${text}__"*\n\nThis is a Phase 1 frontend placeholder response. In Phase 2 & 3, this will return factually grounded answers from Lee Kuan Yew's historical texts via Retrieval-Augmented Generation (RAG) and Google Gemini 2.5.`,
-        'assistant'
-      );
-      setIsGenerating(false);
-    }, 1200);
+  const handleSend = (text: string) => {
+    sendMessage(text);
+  };
+
+  const handleRetry = (prompt: string, messageId: string) => {
+    retryMessage(prompt, messageId);
   };
 
   return (
@@ -41,6 +37,7 @@ export const ChatPage: React.FC = () => {
         messages={messages}
         isGenerating={isGenerating}
         onSelectPrompt={handleSend}
+        onRetry={handleRetry}
       />
       <ChatFooter
         input={inputPrompt}

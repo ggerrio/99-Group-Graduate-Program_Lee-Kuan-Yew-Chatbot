@@ -23,11 +23,17 @@ def chat_endpoint(
     request: ChatRequest,
     orchestrator: ChatOrchestrator = Depends(get_chat_orchestrator),
 ) -> SuccessResponse[ChatResponse]:
-    answer, raw_citations, session_id, is_refusal, is_post_2015 = orchestrator.process_chat(
-        message=request.message,
-        session_id=request.session_id,
-        filters=request.filters,
-    )
+    try:
+        answer, raw_citations, session_id, is_refusal, is_post_2015 = orchestrator.process_chat(
+            message=request.message,
+            session_id=request.session_id,
+            filters=request.filters,
+        )
+    except Exception as exc:
+        from app.exceptions.exceptions import AppException
+        if isinstance(exc, AppException):
+            raise exc
+        raise AppException(message=str(exc), status_code=503)
 
     citations = [CitationItem(**c) for c in raw_citations]
 

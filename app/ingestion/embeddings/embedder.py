@@ -14,6 +14,9 @@ class EmbeddingGenerator:
 
     def _load_model(self):
         try:
+            import os
+            if settings.HF_TOKEN:
+                os.environ["HF_TOKEN"] = settings.HF_TOKEN
             from sentence_transformers import SentenceTransformer
             logger.info(f"Loading SentenceTransformer model '{self.model_name}'...")
             self.model = SentenceTransformer(self.model_name)

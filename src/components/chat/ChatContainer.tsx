@@ -10,12 +10,14 @@ interface ChatContainerProps {
   messages: ChatMessage[];
   isGenerating?: boolean;
   onSelectPrompt: (promptText: string) => void;
+  onRetry?: (prompt: string, messageId: string) => void;
 }
 
 export const ChatContainer: React.FC<ChatContainerProps> = ({
   messages,
   isGenerating,
   onSelectPrompt,
+  onRetry,
 }) => {
   const containerRef = useAutoScroll<HTMLDivElement>([messages, isGenerating]);
 
@@ -33,7 +35,7 @@ export const ChatContainer: React.FC<ChatContainerProps> = ({
       className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 max-w-4xl mx-auto w-full"
     >
       {messages.map((message) => (
-        <MessageBubble key={message.id} message={message} />
+        <MessageBubble key={message.id} message={message} onRetry={onRetry} />
       ))}
 
       {isGenerating && (

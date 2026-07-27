@@ -35,24 +35,37 @@ class GeminiService:
         Generates persona response using Google Gemini SDK or grounded fallback.
         """
         if self.client is not None:
-            try:
-                logger.info(f"Sending generation request to Gemini model '{self.model_name}'...")
-                response = self.client.models.generate_content(
-                    model=self.model_name,
-                    contents=prompt,
-                )
-                if response and response.text:
-                    return response.text.strip()
-                else:
-                    logger.error("Received malformed empty response from Gemini API.")
-                    return "I am unable to generate a response at this moment due to a technical limitation."
-            except Exception as exc:
-                err_msg = str(exc)
-                logger.error(f"Gemini API invocation error: {err_msg}")
-                if "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg:
-                    return "The system is currently experiencing high demand. Please attempt your query again shortly."
-                elif "504" in err_msg or "DEADLINE_EXCEEDED" in err_msg:
-                    return "The request timed out while generating a response."
+            import time
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    logger.info(f"Sending generation request to Gemini model '{self.model_name}' (attempt {attempt + 1})...")
+                    response = self.client.models.generate_content(
+                        model=self.model_name,
+                        contents=prompt,
+                    )
+                    if response and response.text:
+                        return response.text.strip()
+                    else:
+                        logger.error("Received malformed empty response from Gemini API.")
+                        return "I am unable to generate a response at this moment due to a technical limitation."
+                except Exception as exc:
+                    err_msg = str(exc)
+                    logger.error(f"Gemini API invocation error: {err_msg}")
+                    if ("429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg) and attempt < max_retries - 1:
+                        sleep_time = 4.5 * (attempt + 1)
+                        logger.info(f"Rate limited (429). Retrying in {sleep_time:.1f} seconds...")
+                        time.sleep(sleep_time)
+                        continue
+                    elif "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg:
+                        logger.warning("Gemini API rate limit quota exhausted. Falling back to grounded synthesis engine.")
+                        return self._synthesize_grounded_fallback(prompt)
+                    elif "504" in err_msg or "DEADLINE_EXCEEDED" in err_msg:
+                        from app.exceptions.exceptions import GeminiGenerationException
+                        raise GeminiGenerationException("The request timed out while generating AI response. Please try again.")
+                    else:
+                        from app.exceptions.exceptions import GeminiGenerationException
+                        raise GeminiGenerationException(f"AI generation failed: {err_msg}")
 
         # Grounded Fallback Synthesizer for offline/local environment
         logger.info("Using grounded synthesis engine to generate response.")

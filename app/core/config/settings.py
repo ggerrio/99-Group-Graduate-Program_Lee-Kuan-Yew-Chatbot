@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     CHUNK_SIZE: int = Field(default=750, description="Target chunk size in tokens/characters")
     CHUNK_OVERLAP: int = Field(default=150, description="Chunk overlap size in tokens/characters")
     EMBEDDING_MODEL: str = Field(default="BAAI/bge-small-en-v1.5", description="HuggingFace embedding model name")
+    HF_TOKEN: str = Field(default="", description="Optional HuggingFace Hub API Token for authenticated model downloads")
     KNOWLEDGE_DIR: str = Field(default="./knowledge", description="Source raw PDF knowledge directory")
     PROCESSED_DIR: str = Field(default="./processed", description="Processed ingestion artifacts output directory")
     SUPPORTED_EXTENSIONS: List[str] = Field(default=[".pdf"], description="Supported file extensions")

@@ -1,61 +1,63 @@
 import { create } from 'zustand';
-import { ChatMessage, ChatConversation } from '@/types';
+import { ChatMessage, ChatConversation, ChatFilters, CitationItem } from '@/types';
 
-const INITIAL_DEMO_MESSAGES: ChatMessage[] = [
-  {
-    id: 'msg-1',
-    role: 'assistant',
-    content:
-      'Greetings. I am an AI representation modeled after **Lee Kuan Yew**, trained on my memoirs, public speeches, interviews, and official records.\n\nYou may ask me questions regarding governance, economic development, diplomacy, Singapore\'s history, or leadership philosophy.',
-    timestamp: '10:00 AM',
-  },
-];
+// Helper to generate UUID session ID
+const generateSessionId = () => {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return `sess-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+};
 
-const DEMO_CONVERSATIONS: ChatConversation[] = [
-  {
-    id: 'conv-1',
-    title: 'Governance & National Leadership',
-    createdAt: '2026-07-26',
-    updatedAt: '2026-07-26',
-    messages: INITIAL_DEMO_MESSAGES,
-  },
-  {
-    id: 'conv-2',
-    title: 'Economic Transformation Strategy',
-    createdAt: '2026-07-25',
-    updatedAt: '2026-07-25',
-    messages: [],
-  },
-  {
-    id: 'conv-3',
-    title: 'Geopolitics in Southeast Asia',
-    createdAt: '2026-07-24',
-    updatedAt: '2026-07-24',
-    messages: [],
-  },
-];
+const INITIAL_GREETING: ChatMessage = {
+  id: 'msg-greeting',
+  role: 'assistant',
+  content:
+    'Greetings. I am an AI representation modeled after **Lee Kuan Yew**, trained on my memoirs, public speeches, interviews, and official records.\n\nYou may ask me questions regarding governance, economic development, diplomacy, Singapore\'s history, or leadership philosophy.',
+  timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+};
 
 interface ChatStoreState {
+  sessionId: string;
   conversations: ChatConversation[];
   activeConversationId: string;
   messages: ChatMessage[];
   inputPrompt: string;
   isGenerating: boolean;
+  filters: ChatFilters | null;
+  
+  // Actions
+  setSessionId: (sessionId: string) => void;
+  setFilters: (filters: ChatFilters | null) => void;
   setInputPrompt: (text: string) => void;
   selectConversation: (id: string) => void;
   createNewChat: () => void;
-  addMessage: (content: string, role?: 'user' | 'assistant') => void;
+  addMessage: (message: Partial<ChatMessage> & { content: string; role: 'user' | 'assistant' }) => string;
+  updateMessage: (id: string, updates: Partial<ChatMessage>) => void;
+  removeMessage: (id: string) => void;
   clearMessages: () => void;
   setIsGenerating: (generating: boolean) => void;
 }
 
 export const useChatStore = create<ChatStoreState>((set, get) => ({
-  conversations: DEMO_CONVERSATIONS,
+  sessionId: generateSessionId(),
+  conversations: [
+    {
+      id: 'conv-1',
+      title: 'Lee Kuan Yew Persona Session',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      messages: [INITIAL_GREETING],
+    },
+  ],
   activeConversationId: 'conv-1',
-  messages: INITIAL_DEMO_MESSAGES,
+  messages: [INITIAL_GREETING],
   inputPrompt: '',
   isGenerating: false,
+  filters: null,
 
+  setSessionId: (sessionId) => set({ sessionId }),
+  setFilters: (filters) => set({ filters }),
   setInputPrompt: (inputPrompt) => set({ inputPrompt }),
 
   selectConversation: (id) => {
@@ -67,36 +69,87 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
   },
 
   createNewChat: () => {
-    const newId = `conv-${Date.now()}`;
+    const newSessionId = generateSessionId();
+    const newConvId = `conv-${Date.now()}`;
     const newConv: ChatConversation = {
-      id: newId,
+      id: newConvId,
       title: 'New Inquiry',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      messages: INITIAL_DEMO_MESSAGES,
+      messages: [INITIAL_GREETING],
     };
     set((state) => ({
+      sessionId: newSessionId,
       conversations: [newConv, ...state.conversations],
-      activeConversationId: newId,
-      messages: INITIAL_DEMO_MESSAGES,
+      activeConversationId: newConvId,
+      messages: [INITIAL_GREETING],
       inputPrompt: '',
     }));
   },
 
-  addMessage: (content, role = 'user') => {
+  addMessage: (msgData) => {
+    const msgId = msgData.id || `msg-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     const newMessage: ChatMessage = {
-      id: `msg-${Date.now()}`,
-      role,
-      content,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      id: msgId,
+      role: msgData.role,
+      content: msgData.content,
+      timestamp: msgData.timestamp || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      citations: msgData.citations,
+      isRefusal: msgData.isRefusal,
+      isPost2015Inference: msgData.isPost2015Inference,
+      isError: msgData.isError,
+      errorMessage: msgData.errorMessage,
+      retryPrompt: msgData.retryPrompt,
     };
-    set((state) => ({
-      messages: [...state.messages, newMessage],
-      inputPrompt: '',
-    }));
+
+    set((state) => {
+      const updatedMessages = [...state.messages, newMessage];
+      const updatedConvs = state.conversations.map((c) =>
+        c.id === state.activeConversationId ? { ...c, messages: updatedMessages, updatedAt: new Date().toISOString() } : c
+      );
+      return {
+        messages: updatedMessages,
+        conversations: updatedConvs,
+        inputPrompt: msgData.role === 'user' ? '' : state.inputPrompt,
+      };
+    });
+
+    return msgId;
   },
 
-  clearMessages: () => set({ messages: [] }),
+  updateMessage: (id, updates) => {
+    set((state) => {
+      const updatedMessages = state.messages.map((m) => (m.id === id ? { ...m, ...updates } : m));
+      const updatedConvs = state.conversations.map((c) =>
+        c.id === state.activeConversationId ? { ...c, messages: updatedMessages, updatedAt: new Date().toISOString() } : c
+      );
+      return {
+        messages: updatedMessages,
+        conversations: updatedConvs,
+      };
+    });
+  },
+
+  removeMessage: (id) => {
+    set((state) => {
+      const updatedMessages = state.messages.filter((m) => m.id !== id);
+      const updatedConvs = state.conversations.map((c) =>
+        c.id === state.activeConversationId ? { ...c, messages: updatedMessages } : c
+      );
+      return {
+        messages: updatedMessages,
+        conversations: updatedConvs,
+      };
+    });
+  },
+
+  clearMessages: () =>
+    set((state) => {
+      const updatedConvs = state.conversations.map((c) =>
+        c.id === state.activeConversationId ? { ...c, messages: [] } : c
+      );
+      return { messages: [], conversations: updatedConvs };
+    }),
 
   setIsGenerating: (isGenerating) => set({ isGenerating }),
 }));
