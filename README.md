@@ -46,7 +46,7 @@ The application processes user queries through a multi-stage RAG pipeline:
 | :--- | :--- |
 | **Frontend** | React 19, Vite, TypeScript, Tailwind CSS, shadcn/ui, Zustand, TanStack Query, Lucide React, Framer Motion |
 | **Backend** | Python 3.11+, FastAPI, Uvicorn, Pydantic v2, Loguru, SQLAlchemy |
-| **RAG & Vector Search** | `BAAI/bge-small-en-v1.5` (SentenceTransformers), NumPy vectorized dot-product matrix, Google Gemini API (`gemini-2.0-flash`) |
+| **RAG & Vector Search** | `BAAI/bge-small-en-v1.5` (SentenceTransformers), NumPy vectorized dot-product matrix, Google Gemini API (`gemini-3.5-flash-lite`) |
 | **Evaluation Framework** | Custom eval harness (`app/evaluation/`), 60-query gold dataset (`queries.jsonl`), Faithfulness & Persona rubrics |
 | **Deployment** | Vercel (Frontend), Railway Docker Container (Backend) |
 
@@ -149,9 +149,33 @@ python -m app.evaluation.runners.run_evaluation
 
 ---
 
+## 💬 Recommended Questions to Try
+
+The knowledge base currently covers four source documents: *The Singapore Story*, *From Third World to First*, *One Man's View of the World*, and *Singapore's Bilingual Journey* (see [Known Limitations](#-known-limitations--future-work) for scope details). The questions below are chosen to reliably demonstrate each of the system's core behaviors — grounded answers, honest refusal, and post-2015 inference labeling — using topics that are actually well-covered in the ingested corpus.
+
+**Grounded, factual answers (should return a full response with citations):**
+- "What were the core principles behind Singapore's economic success?"
+- "What was the Graduate Mothers Scheme?"
+- "Why did Lee Kuan Yew introduce bilingual education in Singapore?"
+- "How does Lee Kuan Yew view meritocracy in governance?"
+- "What is Lee Kuan Yew's perspective on China's rise as a global power?"
+- "How did Lee Kuan Yew lead Singapore's transition from Third World to First?"
+
+**Out-of-scope questions (should trigger a polite refusal, not a fabricated answer):**
+- "What's your favorite recipe for chicken rice?"
+- "How do I fix a leaking water pipe?"
+
+**Post-2015 questions (should be explicitly labeled as inference, since Lee Kuan Yew passed away in March 2015):**
+- "What would you think about ChatGPT and generative AI?"
+- "What's your view on the COVID-19 pandemic response?"
+
+Trying at least one question from each category is the fastest way to see the RAG grounding, refusal handling, and temporal-awareness features all working as designed.
+
+---
+
 ## 📌 Known Limitations & Future Work
 
-1. **Knowledge Corpus Scope**: The current ingested vector index contains **5,772 chunks** derived primarily from Lee Kuan Yew's major memoirs (*The Singapore Story*, *From Third World to First*, *One Man's View of the World*) and *Singapore's Bilingual Journey*. The `knowledge/speeches/` and `knowledge/interviews/` directories are reserved for future corpus expansion.
+1. **Knowledge Corpus Scope**: Due to time constraints during development, only **4 source PDFs** were sourced and ingested — Lee Kuan Yew's two major memoirs (*The Singapore Story*, *From Third World to First*), one geopolitical essay collection (*One Man's View of the World*), and one article (*Singapore's Bilingual Journey*) — totaling **5,772 vector chunks**. The `knowledge/speeches/` and `knowledge/interviews/` directories are scaffolded in the ingestion pipeline (folder structure and pipeline support already exist) but are currently empty. Adding public-domain speech transcripts (e.g. National Day Rally speeches, parliamentary addresses) is the most direct way to expand corpus coverage, since the ingestion pipeline supports incremental additions without reprocessing existing documents.
 2. **Evaluation Metrics Baseline**:
    - In the Phase 6.3 targeted regression benchmark over 5 previously failing queries, the system achieved **5/5 (100%) pass rate** (Faithfulness: `5.0/5.0`).
    - In the full 60-query Phase 6.1 baseline evaluation, overall faithfulness scored **87.5%**, with residual hallucinations occurring on broad synthesis queries. Refusal precision measured **42.8%** due to strict prefix-matching criteria.

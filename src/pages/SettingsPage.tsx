@@ -58,7 +58,7 @@ export const SettingsPage: React.FC = () => {
                 <Cpu className="h-4 w-4 text-primary" />
                 <span>Primary LLM Provider</span>
               </div>
-              <Badge variant="outline">Google Gemini 2.5 Flash</Badge>
+              <Badge variant="outline">Gemini 3.5 Flash Lite</Badge>
             </div>
 
             <div className="flex items-center justify-between border-b pb-3">
