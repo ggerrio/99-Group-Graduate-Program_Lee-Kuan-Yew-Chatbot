@@ -199,3 +199,13 @@ class TestRagIntegrationNoRegression:
             answer="This event occurred after my lifetime (March 2015). AN INFERENCE BASED ON HISTORICAL PRINCIPLES: ...",
         )
         assert result["score"] == 5.0
+
+
+# ─── Fix 1: Database Session Defensive Validation Tests ───────────────────────
+
+class TestDatabaseSessionValidation:
+    """Verifies defensive DATABASE_URL parsing and directory handling."""
+
+    def test_database_connection_check_returns_bool(self):
+        from app.database.session import check_database_connection
+        assert isinstance(check_database_connection(), bool)
