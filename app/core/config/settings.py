@@ -36,7 +36,7 @@ class Settings(BaseSettings):
 
     # AI, RAG & Chat Settings (Phase 4)
     GEMINI_API_KEY: str = Field(default="", description="Google Gemini API Key")
-    GEMINI_MODEL_NAME: str = Field(default="gemini-2.5-flash", description="Google Gemini Model Name")
+    GEMINI_MODEL_NAME: str = Field(default="gemini-2.0-flash", description="Google Gemini Model Name")
     QDRANT_URL: str = Field(default="http://localhost:6333", description="Qdrant vector DB URL")
     QDRANT_API_KEY: str = Field(default="", description="Qdrant API Key")
     QDRANT_COLLECTION_NAME: str = Field(default="lky_knowledge", description="Qdrant collection name")

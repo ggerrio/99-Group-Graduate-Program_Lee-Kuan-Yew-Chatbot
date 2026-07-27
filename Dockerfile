@@ -22,5 +22,5 @@ COPY . .
 # Expose backend port
 EXPOSE 8000
 
-# Run FastAPI app with Uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run FastAPI app with Uvicorn (supporting dynamic Railway $PORT)
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}

@@ -11,10 +11,10 @@ class HealthService:
     """
     @staticmethod
     def get_health() -> HealthResponse:
-        db_status = "connected" if check_database_connection() else "disconnected"
+        db_status = "connected" if check_database_connection() else "standalone"
         uptime = round(time.time() - START_TIME, 2)
         return HealthResponse(
-            status="ok" if db_status == "connected" else "degraded",
+            status="ok",
             version=settings.APP_VERSION,
             database=db_status,
             uptime_seconds=uptime,

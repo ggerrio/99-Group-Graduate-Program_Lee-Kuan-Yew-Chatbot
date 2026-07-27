@@ -3,6 +3,10 @@ import { ChatRequest, ChatResponseData, ApiResponse } from '@/types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
+if (import.meta.env.PROD && !import.meta.env.VITE_API_BASE_URL) {
+  console.warn('[Deployment Warning] VITE_API_BASE_URL is not set in environment settings. Defaulting to http://localhost:8000.');
+}
+
 export const chatApiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {

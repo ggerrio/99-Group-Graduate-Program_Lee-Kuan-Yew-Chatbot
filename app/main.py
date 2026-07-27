@@ -23,6 +23,16 @@ async def lifespan(app: FastAPI):
     # Database initialization & connection probe
     init_db()
 
+    # Pre-warm SentenceTransformer embedding model & local vector retriever
+    try:
+        from app.retrieval.query_embedder.query_embedder import QueryEmbedder
+        logger.info("Pre-warming QueryEmbedder sentence-transformer model during startup...")
+        embedder = QueryEmbedder()
+        embedder.embed_query("warmup")
+        logger.info("QueryEmbedder pre-warmed successfully.")
+    except Exception as exc:
+        logger.warning(f"QueryEmbedder warmup warning: {exc}")
+
     yield
 
     logger.info(f"Shutting down {settings.APP_NAME}...")
