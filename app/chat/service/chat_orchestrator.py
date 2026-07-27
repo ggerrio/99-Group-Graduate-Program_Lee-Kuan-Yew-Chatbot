@@ -1,3 +1,4 @@
+import re
 import uuid
 from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
@@ -34,6 +35,20 @@ class ChatOrchestrator:
             "Question: {user_query}"
         )
 
+    @staticmethod
+    def _normalize_query(query: str) -> str:
+        """
+        Phase 6.3: Lightweight normalization for noisy/edge-case queries.
+        Collapses repeated punctuation, strips leading/trailing whitespace, and removes
+        excess question marks / exclamation marks so the embedder receives a cleaner signal.
+        The original query text is preserved for display and history; this is used only for retrieval.
+        """
+        # Collapse runs of punctuation (e.g. "???" -> "?")
+        normalized = re.sub(r"([!?]){2,}", r"\1", query)
+        # Collapse multiple spaces
+        normalized = re.sub(r" {2,}", " ", normalized)
+        return normalized.strip()
+
     def process_chat(
         self,
         message: str,
@@ -46,9 +61,12 @@ class ChatOrchestrator:
         active_session_id = session_id or str(uuid.uuid4())
         logger.info(f"Processing chat query for session '{active_session_id}': '{message[:60]}...'")
 
+        # Phase 6.3: Normalize query for cleaner retrieval signal (handles noisy/misspelled edge cases)
+        retrieval_query = self._normalize_query(message)
+
         # Step 1: Retrieve relevant chunks
         chunks = self.retriever.retrieve(
-            query=message,
+            query=retrieval_query,
             top_k=settings.RETRIEVAL_TOP_K,
             filters=filters,
         )
