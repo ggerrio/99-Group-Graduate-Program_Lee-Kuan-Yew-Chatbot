@@ -71,7 +71,7 @@ The application processes user queries through a multi-stage RAG pipeline:
 
 ## 🔗 Live Production Deployment
 
-* **Frontend App (Vercel)**: `https://lky-chatbot.vercel.app`
+* **Frontend App (Vercel)**: `https://99-group-graduate-program-lee-kuan.vercel.app/`
 * **Backend API (Railway)**: `https://99-group-graduate-programlee-kuan-yew-chatbot-production.up.railway.app`
 * **API Documentation**: `https://99-group-graduate-programlee-kuan-yew-chatbot-production.up.railway.app/docs`
 
